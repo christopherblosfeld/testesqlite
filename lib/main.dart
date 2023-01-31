@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
 import 'package:testesqlite/database_helper.dart';
 import 'package:sqflite/sqflite.dart';
+import 'UsuariosPage.dart';
 
 void main() => runApp(MyApp());
 
@@ -36,92 +37,126 @@ class _MyHomePageState extends State<MyHomePage> {
   final dbHelper = DatabaseHelper.instance;
   final TextEditingController nomeController = TextEditingController();
   final TextEditingController idadeController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final _nomeKey = GlobalKey<FormFieldState>();
+  final _idadeKey = GlobalKey<FormFieldState>();
 
   // layout da homepage
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
+        actions: <Widget>[
+          IconButton(
+            alignment: Alignment.centerRight,
+            icon: Icon(
+              Icons.exit_to_app,
+              color: Colors.white,
+            ),
+            onPressed: () {
+              setState(() {
+                print('teste');
+
+                Navigator.push(
+                    //Navegar para a página de usuários cadastrados
+                    context,
+                    MaterialPageRoute(builder: (context) => UsuariosPage()));
+              });
+            },
+          )
+        ],
         title: Text('Exemplo de CRUD básico'),
       ),
-      body: Center(
-        child: Padding(
-          padding: const EdgeInsets.all(8.0),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: <Widget>[
-              TextFormField(
-                controller: nomeController,
-                decoration: InputDecoration(
-                  labelText: 'Digite um nome',
-                  hintText: 'Exemplo: chr.Joseph',
-                  border: OutlineInputBorder(),
+      body: Form(
+        key: _formKey,
+        child: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(8.0),
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: <Widget>[
+                TextFormField(
+                  controller: nomeController,
+                  validator: _validaNome,
+                  key: _nomeKey,
+                  decoration: InputDecoration(
+                    labelText: 'Digite um nome',
+                    hintText: 'Exemplo: chr.Joseph',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
-              ),
-              SizedBox(height: 18),
-              TextFormField(
-                controller: idadeController,
-                decoration: InputDecoration(
-                  labelText: 'Digite uma idade',
-                  //hintText: 'Exemplo: chr.Joseph',
-                  border: OutlineInputBorder(),
+                SizedBox(height: 18),
+                TextFormField(
+                  controller: idadeController,
+                  validator: _validaIdade,
+                  key: _idadeKey,
+                  decoration: InputDecoration(
+                    labelText: 'Digite uma idade',
+                    //hintText: 'Exemplo: chr.Joseph',
+                    border: OutlineInputBorder(),
+                  ),
                 ),
-              ),
-              SizedBox(
-                height: 18,
-              ),
-              ElevatedButton(
-                child: Text(
-                  'Inserir dados',
-                  style: const TextStyle(fontSize: 20),
+                SizedBox(
+                  height: 18,
                 ),
-                onPressed: () async {
-                  setState(() {
-                    _inserir();
-                    print('inserido');
-                  });
-                },
-              ),
-              SizedBox(
-                height: 8,
-              ),
-              ElevatedButton(
-                child: Text(
-                  'Consultar dados',
-                  style: TextStyle(fontSize: 20),
+                ElevatedButton(
+                  child: Text(
+                    'Inserir dados',
+                    style: const TextStyle(fontSize: 20),
+                  ),
+                  onPressed: () async {
+                    setState(() {
+                      if (_nomeKey.currentState?.validate() == false) {
+                        return;
+                      }
+                      if (_idadeKey.currentState?.validate() == false) {
+                        return;
+                      }
+                      _inserir();
+                      print('inserido');
+                    });
+                  },
                 ),
-                onPressed: () {
-                  setState(() {
-                    _consultar();
-                    _inserir();
-                  });
-                },
-              ),
-              SizedBox(
-                height: 8,
-              ),
-              ElevatedButton(
-                child: Text(
-                  'Atualizar dados',
-                  style: TextStyle(fontSize: 20),
+                SizedBox(
+                  height: 8,
                 ),
-                onPressed: () {
-                  _atualizar();
-                },
-              ),
-              SizedBox(
-                height: 8,
-              ),
-              ElevatedButton(
-                child: Text(
-                  'Deletar dados',
-                  style: TextStyle(fontSize: 20),
+                ElevatedButton(
+                  child: Text(
+                    'Consultar dados',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  onPressed: () {
+                    setState(() {
+                      _consultar();
+                    });
+                  },
                 ),
-                onPressed: () {
-                  _deletar();
-                },
-              ),
-            ],
+                SizedBox(
+                  height: 8,
+                ),
+                ElevatedButton(
+                  child: Text(
+                    'Atualizar dados',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  onPressed: () {
+                    _atualizar();
+                  },
+                ),
+                SizedBox(
+                  height: 8,
+                ),
+                ElevatedButton(
+                  child: Text(
+                    'Deletar dados',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  onPressed: () {
+                    _deletar();
+                  },
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -161,5 +196,17 @@ class _MyHomePageState extends State<MyHomePage> {
     final id = await dbHelper.queryRowCount();
     final linhaDeletada = await dbHelper.delete(id!);
     print('Deletada(s) $linhaDeletada linha(s): linha $id');
+  }
+
+  String? _validaNome(String? texto) {
+    if (texto == null || texto.isEmpty) {
+      return 'Informe um nome!';
+    }
+  }
+
+  String? _validaIdade(String? idade) {
+    if (idade == null || idade.isEmpty) {
+      return 'Informe uma idade!';
+    }
   }
 }
