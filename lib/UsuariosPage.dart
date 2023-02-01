@@ -14,6 +14,8 @@ class UsuariosPage extends StatefulWidget {
 @override
 class _UsuariosPageState extends State<UsuariosPage> {
   final dbHelper = DatabaseHelper.instance;
+  List<dynamic> listUsers = [];
+
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
@@ -45,7 +47,9 @@ class _UsuariosPageState extends State<UsuariosPage> {
   Future<List<Map<String, dynamic>>> _consultar() async {
     final todasLinhas = await dbHelper.queryAllRows();
     print('Consulta todas as linhas:');
-    todasLinhas.forEach((row) => print(row));
+    for (var row in todasLinhas) {
+      listUsers.add(row);
+    }
     return todasLinhas;
   }
 }
