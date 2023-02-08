@@ -45,59 +45,56 @@ class Usuario {
 class _UsuariosPageState extends State<UsuariosPage> {
   List<Usuario> listaUsuarios = [];
 
-  void initState() {
-    super.initState();
+  //void initState() {
+  //  super.initState();
 
-
-    // ISSO É IGUAL AO ONCREATE OU ONACTIVE DO DELPHI, ASSIM QUE A TELA ABRIR JA VAI CONSULTAR OS DADOS, ASSIM VOCE NÃO PRECISA DE UM BOTAO PARA ISSO
-    setState(() async {
-      _consultar();
-    });
-  }
+  // ISSO É IGUAL AO ONCREATE OU ONACTIVE DO DELPHI, ASSIM QUE A TELA ABRIR JA VAI CONSULTAR OS DADOS, ASSIM VOCE NÃO PRECISA DE UM BOTAO PARA ISSO
+  //  setState(() async {
+  //    _consultar();
+  //  });
+  // }
 
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         backgroundColor: Colors.red,
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Center(
-              child: ElevatedButton(
+      body: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Column(
+          children: [
+            ElevatedButton(
                 child: const Text(
                   'Consultar dados',
                   style: TextStyle(fontSize: 20),
                 ),
-                onPressed: () {
-                int id = listaUsuarios[0].id.toString(),
-                String nome = listaUsuarios[0].nome.toString(),
-                
-
-
-                
-
-                  }
-                   ], 
-                  )
-                },
-              ),
-            ),
-          ),
-        ],
+                onPressed: () async {
+                  await _consultar();
+                  setState(() {});
+                }),
+            ListView(
+              shrinkWrap: true,
+              children: [
+                for (Usuario usuario in listaUsuarios)
+                  UsuarioListItem(usuario: usuario, onDelete: onDelete)
+              ],
+            )
+          ],
+        ),
       ),
     );
   }
 
-  void _consultar() async {
+  Future<void> _consultar() async {
     // final todasLinhas = await dbHelper.queryAllRows();
     // print('Consulta todas as linhas:');
     // todasLinhas.forEach((row) => print(row));
     listaUsuarios = await buscaUsuarios();
   }
 
-  void recuperarUsuarios() {
-
+  void onDelete(Usuario usuario) {
+    setState(() {
+      listaUsuarios.remove(usuario);
+    });
   }
 }

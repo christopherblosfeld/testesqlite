@@ -56,7 +56,6 @@ class _MyHomePageState extends State<MyHomePage> {
             onPressed: () {
               setState(() {
                 print('teste');
-
                 Navigator.push(
                     //Navegar para a página de usuários cadastrados
                     context,
