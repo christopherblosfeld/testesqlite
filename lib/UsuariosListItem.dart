@@ -42,9 +42,11 @@ class _UsuarioListItemState extends State<UsuarioListItem> {
                 onPressed: () {
                   setState(() {
                     print('teste');
-                    if (alertPergunta(context, 'Remover usuário',
-                            'Tem certeza que deseja remover?') ==
-                        true) {}
+                    //if (alertPergunta(context, 'Remover usuário',
+                    //        'Tem certeza que deseja remover?') ==
+                    //    true) {
+                    //
+                    //    }
                   });
                 },
               )
