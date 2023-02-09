@@ -113,46 +113,13 @@ class _MyHomePageState extends State<MyHomePage> {
                       }
                       _inserir();
                       print('inserido');
+                      nomeController.clear();
+                      idadeController.clear();
                     });
                   },
                 ),
                 SizedBox(
                   height: 8,
-                ),
-                ElevatedButton(
-                  child: Text(
-                    'Consultar dados',
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  onPressed: () {
-                    setState(() {
-                      _consultar();
-                    });
-                  },
-                ),
-                SizedBox(
-                  height: 8,
-                ),
-                ElevatedButton(
-                  child: Text(
-                    'Atualizar dados',
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  onPressed: () {
-                    _atualizar();
-                  },
-                ),
-                SizedBox(
-                  height: 8,
-                ),
-                ElevatedButton(
-                  child: Text(
-                    'Deletar dados',
-                    style: TextStyle(fontSize: 20),
-                  ),
-                  onPressed: () {
-                    _deletar();
-                  },
                 ),
               ],
             ),
@@ -195,6 +162,37 @@ class _MyHomePageState extends State<MyHomePage> {
     final id = await dbHelper.queryRowCount();
     final linhaDeletada = await dbHelper.delete(id!);
     print('Deletada(s) $linhaDeletada linha(s): linha $id');
+  }
+
+  static Future<bool> alertPergunta(
+      BuildContext context, String titulo, String msg) async {
+    bool ret = false;
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(titulo),
+          content: Text(msg),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                ret = true;
+                Navigator.pop(context, true);
+              },
+              child: const Text('Sim'),
+            ),
+            TextButton(
+              onPressed: () {
+                ret = false;
+                Navigator.pop(context, false);
+              },
+              child: const Text('Não'),
+            )
+          ],
+        );
+      },
+    );
+    return ret;
   }
 
   String? _validaNome(String? texto) {

@@ -61,27 +61,82 @@ class _UsuariosPageState extends State<UsuariosPage> {
       ),
       body: Padding(
         padding: const EdgeInsets.all(8.0),
-        child: Column(
-          children: [
-            ElevatedButton(
-                child: const Text(
-                  'Consultar dados',
-                  style: TextStyle(fontSize: 20),
+        child: Padding(
+          padding: const EdgeInsets.all(8.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              ElevatedButton(
+                  child: const Text(
+                    'Consultar dados',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  onPressed: () async {
+                    await _consultar();
+                    setState(() {});
+                  }),
+              SizedBox(height: 8),
+              Expanded(
+                child: ListView.builder(
+                  shrinkWrap: true,
+                  itemCount: listaUsuarios.length,
+
+                  // ISSO AQUI É UM CONSTRUTOR DE WIDGETS, BASEADO EM CONTEXTO E UM CONTADOR(INDEX) QUE É DEFINIDO PELO ITEMCOUNT DO WIDGET,
+                  // ENTÃO ELE VAI FAZER UM "FOR" NESSE INDEX, E NISSO VAI CONTRUIR OS WIDGETS
+                  // PODE PARECER QUE NÃO FAZ DIFERENÇA, MAS ESSE CARA AI SÓ CONSTROI O QUE TIVER NO SCROLL DELE, ENTÃO O QUE TA PRA CIMA OU PRA BAIXO
+                  // NAO É CONSTRUIDO, ASSIM ECONOMIZA MEMORIA RAM DO DISPOSITOVO E DEIXA O APP MAIS LEVE
+                  itemBuilder: (context, index) {
+                    return UsuarioListItem(
+                      usuario: listaUsuarios[index],
+                      deletaUsuario: () async {
+                        await _deletar(listaUsuarios[index].id!);
+                        alert(context, 'exclusão', 'a tarefa será excluída');
+                        await _consultar();
+                        setState(() {});
+                      },
+                    );
+                  },
                 ),
-                onPressed: () async {
-                  await _consultar();
-                  setState(() {});
-                }),
-            ListView(
-              shrinkWrap: true,
-              children: [
-                for (Usuario usuario in listaUsuarios)
-                  UsuarioListItem(usuario: usuario, onDelete: onDelete)
-              ],
-            )
-          ],
+              ),
+              // Flexible(
+              //   child: ListView(
+              //     shrinkWrap: true,
+              //     children: [
+              //       for (Usuario usuario in listaUsuarios)
+              //         UsuarioListItem(usuario: usuario)
+              //     ],
+              //   ),
+              // )
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Future<void> _deletar(int iduser) async {
+    final id = await DatabaseHelper.instance.delete(iduser);
+    //final linhaDeletada = await DatabaseHelper.instance.delete(iduser);
+    print('Linha deletada: linha $id');
+  }
+
+  static alert(BuildContext context, String titulo, String msg) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(titulo),
+          content: Text(msg),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Ok'),
+            )
+          ],
+        );
+      },
     );
   }
 

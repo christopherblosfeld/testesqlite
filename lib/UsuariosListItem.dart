@@ -1,23 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'UsuariosPage.dart';
+import 'database_helper.dart';
 
 class UsuarioListItem extends StatefulWidget {
   const UsuarioListItem({
     Key? key,
     required this.usuario,
-    required this.onDelete,
+    required this.deletaUsuario,
   }) : super(key: key);
 
   final Usuario usuario;
-  final Function(Usuario) onDelete;
+  final Function deletaUsuario;
 
   @override
   State<UsuarioListItem> createState() => _UsuarioListItemState();
 }
 
 class _UsuarioListItemState extends State<UsuarioListItem> {
-  //final Function(Usuario) onDelete;
   @override
   Widget build(BuildContext context) {
     return Card(
@@ -39,16 +39,7 @@ class _UsuarioListItemState extends State<UsuarioListItem> {
                   )),
               IconButton(
                 icon: Icon(Icons.delete),
-                onPressed: () {
-                  setState(() {
-                    print('teste');
-                    //if (alertPergunta(context, 'Remover usuário',
-                    //        'Tem certeza que deseja remover?') ==
-                    //    true) {
-                    //
-                    //    }
-                  });
-                },
+                onPressed: () => widget.deletaUsuario(),
               )
             ],
           ),
@@ -104,5 +95,11 @@ class _UsuarioListItemState extends State<UsuarioListItem> {
       },
     );
     return ret;
+  }
+
+  void _deletar(int iduser) async {
+    final id = await DatabaseHelper.instance.delete(iduser);
+    //final linhaDeletada = await DatabaseHelper.instance.delete(iduser);
+    print('Linha deletada: linha $id');
   }
 }
