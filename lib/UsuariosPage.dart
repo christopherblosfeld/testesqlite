@@ -44,6 +44,10 @@ class Usuario {
 @override
 class _UsuariosPageState extends State<UsuariosPage> {
   List<Usuario> listaUsuarios = [];
+  final TextEditingController novoNome = TextEditingController();
+  final TextEditingController novaidade = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
+  final _nomeKey = GlobalKey<FormFieldState>();
 
   //void initState() {
   //  super.initState();
@@ -68,7 +72,7 @@ class _UsuariosPageState extends State<UsuariosPage> {
             children: [
               ElevatedButton(
                   child: const Text(
-                    'Consultar dados',
+                    'Consultar DADOS',
                     style: TextStyle(fontSize: 20),
                   ),
                   onPressed: () async {
@@ -94,19 +98,24 @@ class _UsuariosPageState extends State<UsuariosPage> {
                         await _consultar();
                         setState(() {});
                       },
+                      atualizaUsuario: () async {
+                        alert(context, 'Alterar', 'Informe o novo nome');
+
+                        await _atualizar(
+                            listaUsuarios[index].id!,
+                            novoNome
+                                .text); //Passando o novo nome e a nova idade após o usuario clicar em atualizar.
+                        await _consultar();
+                        setState(() {
+                          if (_nomeKey.currentState?.validate() == true) {
+                            return;
+                          }
+                        });
+                      },
                     );
                   },
                 ),
               ),
-              // Flexible(
-              //   child: ListView(
-              //     shrinkWrap: true,
-              //     children: [
-              //       for (Usuario usuario in listaUsuarios)
-              //         UsuarioListItem(usuario: usuario)
-              //     ],
-              //   ),
-              // )
             ],
           ),
         ),
@@ -120,7 +129,18 @@ class _UsuariosPageState extends State<UsuariosPage> {
     print('Linha deletada: linha $id');
   }
 
-  static alert(BuildContext context, String titulo, String msg) {
+  Future<void> _atualizar(int iduser, String nome) async {
+    // linha para atualizar
+    Map<String, dynamic> row = {
+      DatabaseHelper.columnId: iduser,
+      DatabaseHelper.columnNome: nome,
+      DatabaseHelper.columnIdade: 15,
+    };
+    final linhasAfetadas = await DatabaseHelper.instance.update(row);
+    print('atualizadas $linhasAfetadas linha(s)');
+  }
+
+  alert(BuildContext context, String titulo, String msg) {
     showDialog(
       context: context,
       builder: (context) {
@@ -128,6 +148,18 @@ class _UsuariosPageState extends State<UsuariosPage> {
           title: Text(titulo),
           content: Text(msg),
           actions: <Widget>[
+            Form(
+              key: _formKey,
+              child: TextFormField(
+                key: _nomeKey,
+                controller: novoNome,
+                validator: _validaNome,
+                decoration: InputDecoration(
+                  labelText: 'Nome',
+                  border: OutlineInputBorder(),
+                ),
+              ),
+            ),
             TextButton(
               onPressed: () {
                 Navigator.pop(context);
@@ -138,6 +170,12 @@ class _UsuariosPageState extends State<UsuariosPage> {
         );
       },
     );
+  }
+
+  String? _validaNome(String? texto) {
+    if (texto == null || texto.isEmpty) {
+      return 'Informe um nome!';
+    }
   }
 
   Future<void> _consultar() async {
