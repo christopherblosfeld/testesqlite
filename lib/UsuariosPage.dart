@@ -97,25 +97,26 @@ class _UsuariosPageState extends State<UsuariosPage> {
                       },
                       atualizaUsuario: () async {
                         try {
-                          int idade = await alert(context, 'Atualizar dados',
-                              'Informe os novos dados');
-                          //if (nome == null || nome.isEmpty) {
-                          //  return;
-                          // }
+                          print('idade ${novaidade.text}');
+                          print('nome ${novoNome.text}');
+                          
+                          await alert(context, 'Atualizar dados', 'Informe os novos dados');
+                          int idade = int.parse(novaidade.text);
+                          print('idade $idade');
 
                           await _atualizar(
                               listaUsuarios[index].id!, novoNome.text, idade);
                           await _consultar();
                           setState(() {});
                           print(novoNome.text);
-                          print(idade.toString());
                           novoNome.clear();
+                          novaidade.clear();
+
                         } catch (e) {
                           print('deu ruim');
                           print(e);
                         }
                       },
-                      //}
                     );
                   },
                 ),
@@ -128,8 +129,8 @@ class _UsuariosPageState extends State<UsuariosPage> {
   }
 
   alert(BuildContext context, String titulo, String msg) async {
-    String? nome;
-    String? idade;
+    //String? nome;
+    //String? idade;
 
     await showDialog(
       context: context,
@@ -156,6 +157,7 @@ class _UsuariosPageState extends State<UsuariosPage> {
                   ),
                   TextFormField(
                     controller: novaidade,
+                    keyboardType: TextInputType.number,
                     key: _idadeKey,
                     validator: _validaIdade,
                     decoration: const InputDecoration(
@@ -164,17 +166,12 @@ class _UsuariosPageState extends State<UsuariosPage> {
                     ),
                   ),
                   ElevatedButton(
-                    onPressed: () {
+                    onPressed: () async {
                       if (_nomeKey.currentState?.validate() == false ||
                           _idadeKey.currentState?.validate() == false) {
                         return;
-                      } else {
-                        int idade = int.tryParse(novaidade.text) ?? (99);
-                        //nome = novoNome.text;
-                        //idade = novaidade.text;
-                        //int.tryParse(novaidade.text) ?? (99);
-                        Navigator.of(context).pop([novoNome.text, idade]);
-                        //Navigator.pop(context, nome);
+                      } else  {
+                        Navigator.of(context).pop([novoNome.text, novaidade.text]);
                       }
                     },
                     child: const Text('Ok'),
@@ -187,7 +184,7 @@ class _UsuariosPageState extends State<UsuariosPage> {
       },
     );
 
-    return idade;
+    //return idade;
   }
 
   Future<void> _deletar(int iduser) async {
