@@ -77,29 +77,32 @@ class _MyHomePageState extends State<MyHomePage> {
                 TextFormField(
                   controller: nomeController,
                   validator: _validaNome,
+                  maxLength: 10,
                   key: _nomeKey,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Digite um nome',
                     hintText: 'Exemplo: chr.Joseph',
                     border: OutlineInputBorder(),
                   ),
                 ),
-                SizedBox(height: 18),
+                const SizedBox(height: 18),
                 TextFormField(
+                  maxLength: 2,
                   controller: idadeController,
+                  keyboardType: TextInputType.number,
                   validator: _validaIdade,
                   key: _idadeKey,
-                  decoration: InputDecoration(
+                  decoration: const InputDecoration(
                     labelText: 'Digite uma idade',
-                    //hintText: 'Exemplo: chr.Joseph',
+                    hintText: 'Exemplo: chr.Joseph',
                     border: OutlineInputBorder(),
                   ),
                 ),
-                SizedBox(
+                const SizedBox(
                   height: 18,
                 ),
                 ElevatedButton(
-                  child: Text(
+                  child: const Text(
                     'Inserir dados',
                     style: const TextStyle(fontSize: 20),
                   ),

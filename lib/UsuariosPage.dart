@@ -46,8 +46,11 @@ class _UsuariosPageState extends State<UsuariosPage> {
   List<Usuario> listaUsuarios = [];
   final TextEditingController novoNome = TextEditingController();
   final TextEditingController novaidade = TextEditingController();
+  //int? idade;
   final _formKey = GlobalKey<FormState>();
   final _nomeKey = GlobalKey<FormFieldState>();
+  final _idadeKey = GlobalKey<FormFieldState>();
+  //static String? nome;
 
   //void initState() {
   //  super.initState();
@@ -84,34 +87,35 @@ class _UsuariosPageState extends State<UsuariosPage> {
                 child: ListView.builder(
                   shrinkWrap: true,
                   itemCount: listaUsuarios.length,
-
-                  // ISSO AQUI É UM CONSTRUTOR DE WIDGETS, BASEADO EM CONTEXTO E UM CONTADOR(INDEX) QUE É DEFINIDO PELO ITEMCOUNT DO WIDGET,
-                  // ENTÃO ELE VAI FAZER UM "FOR" NESSE INDEX, E NISSO VAI CONTRUIR OS WIDGETS
-                  // PODE PARECER QUE NÃO FAZ DIFERENÇA, MAS ESSE CARA AI SÓ CONSTROI O QUE TIVER NO SCROLL DELE, ENTÃO O QUE TA PRA CIMA OU PRA BAIXO
-                  // NAO É CONSTRUIDO, ASSIM ECONOMIZA MEMORIA RAM DO DISPOSITOVO E DEIXA O APP MAIS LEVE
                   itemBuilder: (context, index) {
                     return UsuarioListItem(
                       usuario: listaUsuarios[index],
                       deletaUsuario: () async {
                         await _deletar(listaUsuarios[index].id!);
-                        alert(context, 'exclusão', 'a tarefa será excluída');
                         await _consultar();
                         setState(() {});
                       },
                       atualizaUsuario: () async {
-                        alert(context, 'Alterar', 'Informe o novo nome');
+                        try {
+                          int idade = await alert(context, 'Atualizar dados',
+                              'Informe os novos dados');
+                          //if (nome == null || nome.isEmpty) {
+                          //  return;
+                          // }
 
-                        await _atualizar(
-                            listaUsuarios[index].id!,
-                            novoNome
-                                .text); //Passando o novo nome e a nova idade após o usuario clicar em atualizar.
-                        await _consultar();
-                        setState(() {
-                          if (_nomeKey.currentState?.validate() == true) {
-                            return;
-                          }
-                        });
+                          await _atualizar(
+                              listaUsuarios[index].id!, novoNome.text, idade);
+                          await _consultar();
+                          setState(() {});
+                          print(novoNome.text);
+                          print(idade.toString());
+                          novoNome.clear();
+                        } catch (e) {
+                          print('deu ruim');
+                          print(e);
+                        }
                       },
+                      //}
                     );
                   },
                 ),
@@ -123,53 +127,84 @@ class _UsuariosPageState extends State<UsuariosPage> {
     );
   }
 
+  alert(BuildContext context, String titulo, String msg) async {
+    String? nome;
+    String? idade;
+
+    await showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text(titulo, style: TextStyle(color: Colors.red)),
+          content: Text(msg),
+          actions: <Widget>[
+            Form(
+              key: _formKey,
+              child: Column(
+                children: [
+                  TextFormField(
+                    key: _nomeKey,
+                    controller: novoNome,
+                    validator: _validaNome,
+                    decoration: const InputDecoration(
+                      labelText: 'Nome',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 25,
+                  ),
+                  TextFormField(
+                    controller: novaidade,
+                    key: _idadeKey,
+                    validator: _validaIdade,
+                    decoration: const InputDecoration(
+                      labelText: 'Idade',
+                      border: OutlineInputBorder(),
+                    ),
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      if (_nomeKey.currentState?.validate() == false ||
+                          _idadeKey.currentState?.validate() == false) {
+                        return;
+                      } else {
+                        int idade = int.tryParse(novaidade.text) ?? (99);
+                        //nome = novoNome.text;
+                        //idade = novaidade.text;
+                        //int.tryParse(novaidade.text) ?? (99);
+                        Navigator.of(context).pop([novoNome.text, idade]);
+                        //Navigator.pop(context, nome);
+                      }
+                    },
+                    child: const Text('Ok'),
+                  ),
+                ],
+              ),
+            )
+          ],
+        );
+      },
+    );
+
+    return idade;
+  }
+
   Future<void> _deletar(int iduser) async {
     final id = await DatabaseHelper.instance.delete(iduser);
     //final linhaDeletada = await DatabaseHelper.instance.delete(iduser);
     print('Linha deletada: linha $id');
   }
 
-  Future<void> _atualizar(int iduser, String nome) async {
+  Future<void> _atualizar(int iduser, String nome, int idade) async {
     // linha para atualizar
     Map<String, dynamic> row = {
       DatabaseHelper.columnId: iduser,
       DatabaseHelper.columnNome: nome,
-      DatabaseHelper.columnIdade: 15,
+      DatabaseHelper.columnIdade: idade,
     };
     final linhasAfetadas = await DatabaseHelper.instance.update(row);
     print('atualizadas $linhasAfetadas linha(s)');
-  }
-
-  alert(BuildContext context, String titulo, String msg) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text(titulo),
-          content: Text(msg),
-          actions: <Widget>[
-            Form(
-              key: _formKey,
-              child: TextFormField(
-                key: _nomeKey,
-                controller: novoNome,
-                validator: _validaNome,
-                decoration: InputDecoration(
-                  labelText: 'Nome',
-                  border: OutlineInputBorder(),
-                ),
-              ),
-            ),
-            TextButton(
-              onPressed: () {
-                Navigator.pop(context);
-              },
-              child: const Text('Ok'),
-            )
-          ],
-        );
-      },
-    );
   }
 
   String? _validaNome(String? texto) {
@@ -178,16 +213,19 @@ class _UsuariosPageState extends State<UsuariosPage> {
     }
   }
 
+  String? _validaIdade(String? idade) {
+    if (idade == null || idade.isEmpty) {
+      return 'Informe uma idade!';
+    }
+  }
+
   Future<void> _consultar() async {
-    // final todasLinhas = await dbHelper.queryAllRows();
-    // print('Consulta todas as linhas:');
-    // todasLinhas.forEach((row) => print(row));
     listaUsuarios = await buscaUsuarios();
   }
 
-  void onDelete(Usuario usuario) {
-    setState(() {
-      listaUsuarios.remove(usuario);
-    });
-  }
+  //void onDelete(Usuario usuario) {
+  //  setState(() {
+  //    listaUsuarios.remove(usuario);
+  //  });
+  // }
 }
